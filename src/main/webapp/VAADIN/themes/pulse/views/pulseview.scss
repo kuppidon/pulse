@@ -1,0 +1,365 @@
+@mixin pulse-pulse-view {
+
+  .pulse-view.pulse-view {
+    padding: $view-padding;
+    overflow: visible;
+
+    .sparks {
+      @include valo-panel-style;
+      margin-bottom: round($view-padding / 3);
+
+      @include width-range($max: 680px) {
+        .spark {
+          width: 50%;
+        }
+        .spark:nth-child(2n+1) {
+          border-left: none;
+        }
+        .spark:nth-child(n+3) {
+          border-top: valo-border($strength: 0.3);
+        }
+      }
+
+      @include width-range($max: 270px) {
+        .spark {
+          width: 100%;
+          border-left: none;
+          border-top: valo-border($strength: 0.3);
+
+          &:first-child {
+            border-top: none;
+          }
+        }
+      }
+    }
+
+    .spark {
+      float: left;
+      text-align: center;
+      width: 25%;
+      padding: $v-layout-spacing-vertical $v-layout-spacing-horizontal;
+      border-left: valo-border($strength: 0.3);
+      line-height: 1.35;
+
+      > tbody {
+        display: inline-block;
+      }
+
+      &:first-child {
+        border-left: none;
+      }
+    }
+
+    .pulse-panel-toolbar {
+      padding: 1px 0 1px round($v-unit-size / 1.8);
+      height: $v-unit-size + 2px;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .pulse-panels {
+      display: block;
+      height: 100%;
+      margin: 0 round($view-padding / -3);
+
+      .card {
+        height: 100%;
+        overflow: hidden;
+        padding: $v-unit-size + 2px round($view-padding / 2) 0;
+        position: relative;
+
+        .v-table, .v-table-table {
+          background: transparent;
+        }
+      }
+
+      .top10-revenue {
+        .card {
+          padding-left: 0;
+          padding-right: 0;
+        }
+
+        .v-table-table {
+          @include box-shadow(none);
+        }
+
+        .v-table-cell-wrapper {
+          padding-left: round($view-padding / 2);
+          padding-right: round($view-padding / 2);
+        }
+
+        .v-table-cell-content {
+          border-color: first-color(valo-border($strength: 0.3));
+        }
+
+        .v-table-cell-content-rowheader {
+          color: valo-font-color($v-app-background-color, 0.4);
+
+          .v-table-cell-wrapper {
+            padding-right: 0;
+          }
+        }
+      }
+
+      .pulse-panel-slot {
+        padding: round($view-padding / 3);
+        min-height: 220px;
+      }
+
+      &[width-range~="0-700px"] {
+        .pulse-panel-slot {
+          width: 100% !important;
+        }
+      }
+
+      &[width-range~="701px-"] {
+        .pulse-panel-slot {
+          width: 50% !important;
+        }
+      }
+
+      &[height-range~="0-440px"] {
+        .pulse-panel-slot {
+          height: 100%;
+        }
+      }
+
+      &[height-range~="441px-"] {
+        .pulse-panel-slot {
+          height: 50%;
+        }
+      }
+
+      .pulse-panel-slot.max {
+        width: 100% !important;
+        height: 100%;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .notes {
+        .card {
+          padding: $v-unit-size + 2px 0 0;
+        }
+
+        .v-textarea {
+          border-top: valo-border($strength: 0.5);
+          padding: 20px 20px 0;
+          line-height: 20px;
+          font-size: 13px;
+          background: #fffdf2 url(../img/notes-bg.png) repeat;
+          background-attachment: local;
+          color: #545145;
+          overflow: auto;
+        }
+      }
+    }
+
+  }
+
+  .pulse-view {
+    @include width-range($max: 480px) {
+      padding-left: round($view-padding / 2);
+      padding-right: round($view-padding / 2);
+    }
+  }
+
+  .v-panel-assignment{
+    .v-panel-caption{
+      line-height: 20px;
+      background: #add8e6;
+      color: blue;
+      margin: 0px;
+      text-align: right;
+      padding: 0px;
+      box-shadow: 0px;
+    }
+  }
+
+
+  .v-textfield-patientField {
+      background: #FFFACD;
+      font-weight: bold;
+    }
+
+  .small_line_height{
+   // .v-panel-caption {
+     // line-height: (36px);
+    //}
+  }
+
+  .small_table{
+    .v-table-body{
+      .v-table-cell{
+        line-height: 30px;
+      }
+    }
+  }
+
+  .v-caption-horizontal_caption {
+    display: inline-block;
+  }
+
+  .v-datefield-no_icon {
+    .v-datefield-button {
+      display: none;
+    }
+    .v-datefield-textfield{
+      text-align: right;
+      padding-left: 1px;
+    }
+  }
+
+
+.grid-button-delete {
+  .v-nativebutton {
+    height: 30px;
+    color: #f9f0ef;
+    border-radius: 4px;
+    border: 1px solid #bb382e;
+    border-top-color: #bc3c31;
+    border-bottom-color: #b13028;
+    background-color: #ed473b;
+    background-image: -webkit-linear-gradient(bottom, #ee4c3f 2%, #e13e33 98%);
+    background-image: linear-gradient(to bottom,#ee4c3f 2%, #e13e33 98%);
+    -webkit-box-shadow: inset 0 1px 0 #ef786f, inset 0 -1px 0 #da3c31, 0 2px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 0 #ef786f, inset 0 -1px 0 #da3c31, 0 2px 3px rgba(0, 0, 0, 0.05);
+    text-shadow:0 -1px 0 rgba(0, 0, 0, 0.05);
+    padding: 0 16px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    &:before {
+      content: "\f1f8";
+      font-family: FontAwesome;
+      font-weight: normal;
+    }
+  }
+}
+
+  .vlayout-style-border-blue{
+
+      border-radius: 10px;
+      border-color: lightskyblue;
+      border-style: solid;
+      border-width: 2px;
+      padding-left: 10px;
+      padding-right: 10px;
+      padding-bottom: 2px;
+      padding-top: 2px;
+
+  }
+
+  .hierarchicalgrid {
+    .grid-node-parents-1 {padding-left: $grid-node-indent;}
+    .grid-node-parents-2 {padding-left: $grid-node-indent*2;}
+    .grid-node-parents-3 {padding-left: $grid-node-indent*3;}
+    .grid-node-parents-4 {padding-left: $grid-node-indent*4;}
+    .grid-node-parents-5 {padding-left: $grid-node-indent*5;}
+    .grid-node-parents-6 {padding-left: $grid-node-indent*6;}
+
+    // Collapsed node style
+    .v-grid-cell.grid-tree-node::before {
+      // TODO Could use 'valo-tree-collapsed-icon-style' here
+      content: "\f0da";
+      display: inline-block;
+      font-family: FontAwesome;
+      text-align: center;
+      transition: all 100ms ease 0s;
+      width: 1.0em;
+    }
+
+    // Expanded node style
+    .v-grid-cell.grid-node-expanded::before {
+      content: "\f0da";
+      transform: rotate(90deg);
+    }
+
+    // Leaf style
+    .v-grid-cell.grid-tree-node.grid-node-leaf::before {
+      content: "";
+      display: none;
+      position: relative;
+    }
+  }
+
+  .notifications.v-window {
+    overflow: visible !important;
+    // top: 3 * $v-unit-size !important;
+    right: $view-padding;
+    left: auto !important;
+    max-width: 90%;
+
+    $window-outline: $v-overlay-shadow;
+    @if list-of-lists($window-outline) {
+      $window-outline: last($v-overlay-shadow);
+    }
+    $window-outline: flatten-list(valo-bevel-and-shadow($bevel: null, $shadow: $window-outline));
+    $outline-width: nth($window-outline, length($window-outline) - 1);
+    $outline-color: last($window-outline);
+
+    @include transform-origin(296px - (2 * $v-unit-size - round($v-unit-size / 3)) -7px);
+
+    &.v-window-animate-in {
+      @include animation(animate-in-scale-up 260ms cubic-bezier(.68,.37,.51,1.37));
+    }
+
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      top: -14px;
+      right: 2 * $v-unit-size - round($v-unit-size / 3);
+      border: 7px solid transparent;
+      width: 0;
+      height: 0;
+      border-bottom-color: $v-window-background-color;
+    }
+
+
+    &:before {
+      @if type-of($outline-width) == number and $outline-width > 0 {
+        top: -15px - 2 * $outline-width;
+        margin-right: -$outline-width;
+        border-width: 7px + $outline-width;
+        border-bottom-width: 8px;
+        border-bottom-color: $outline-color;
+      } @else {
+        content: none;
+      }
+    }
+
+    .v-window-header {
+      color: $v-selection-color;
+    }
+
+    .v-window-outerheader:after,
+    .v-scrollable:before {
+      display: none;
+    }
+
+    .notification-item {
+      font-size: round($v-font-size * 0.9);
+    }
+
+    .notification-title {
+      font-weight: $v-font-weight + 200;
+    }
+
+    .notification-time {
+      font-size: round($v-font-size * 0.8);
+      color: valo-font-color($v-window-background-color, .5);
+    }
+
+  }
+
+  // Need to use normal media queries because Responsive doesn't work for overlay elements just yet
+  @media screen and (max-width: 480px) {
+    .notifications.v-window {
+      right: round($view-padding / 2);
+    }
+  }
+
+
+}

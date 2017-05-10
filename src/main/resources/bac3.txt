@@ -1,0 +1,221 @@
+package ua.pulse.view.mainforms;
+
+import com.google.common.eventbus.Subscribe;
+import com.vaadin.data.Item;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Responsive;
+import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.*;
+import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.themes.ValoTheme;
+import ua.pulse.bean.HospitalBean;
+import ua.pulse.bean.UserBean;
+import ua.pulse.bean.VenueBean;
+import ua.pulse.component.CreateEditHospitalWindow;
+import ua.pulse.converter.ObjectsConverterService;
+import ua.pulse.event.PulseEvent;
+import ua.pulse.event.PulseEventBus;
+import ua.pulse.vaadin.PulseUI;
+import ua.pulse.view.PulseViewType;
+
+/**
+ * Created by Alex on 15.01.2017.
+ */
+public class AdminView extends VerticalLayout implements View {
+
+
+    private VenueBean department;
+    private UserBean currentUser;
+    private Grid grid;
+    private Tree tree;
+    private final ObjectsConverterService objectsConverterService;
+    private PulseViewType type = PulseViewType.HOSPITALS;
+
+
+    public AdminView(){
+
+        setSizeFull();
+        addStyleName("postview");
+        PulseEventBus.register(this);
+        department = PulseUI.getDataProvider().getVenueById(1l);
+        currentUser = PulseUI.getAuntetificateUser();
+        objectsConverterService = PulseUI.getObjectsConverterService();
+
+        HorizontalLayout header = new HorizontalLayout();
+        header.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
+        header.setWidth("100%");
+        header.setMargin(false);
+        Responsive.makeResponsive(header);
+
+        Button addBtn = new Button("Добавить", FontAwesome.PLUS);
+        addBtn.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+        addBtn.addStyleName(ValoTheme.BUTTON_TINY);
+        addBtn.addClickListener(event -> {
+            if (type.equals(PulseViewType.HOSPITALS)){
+                getUI().addWindow(new CreateEditHospitalWindow((HospitalBean) PulseUI.getSpringBean("hospitalBean")));
+            }
+        });
+        header.addComponent(addBtn);
+
+
+        tree = new Tree();
+
+        grid = new Grid();
+        grid.setSizeFull();
+        grid.setImmediate(true);
+        grid.setEditorEnabled(true);
+        Grid.SingleSelectionModel selectionModel = new Grid.SingleSelectionModel();
+        selectionModel.setDeselectAllowed(false);
+        grid.setSelectionModel(selectionModel);
+        grid.setColumnReorderingAllowed(true);
+
+        buildGridHospitals();
+
+        addComponents(header,grid);
+        setExpandRatio(grid,1);
+
+    }
+
+    private void buildGridHospitals(){
+
+        tree.setVisible(false);
+        grid.setVisible(true);
+        //grid.addStyleName("test");
+        BeanContainer container = new BeanContainer(HospitalBean.class);
+        container.setBeanIdProperty("id");
+        container.addAll(HospitalBean.getAllHospitals());
+        // wrap the bean item container so we can generated a fake header column
+        GeneratedPropertyContainer wrappingContainer = new GeneratedPropertyContainer(container);
+        wrappingContainer.addGeneratedProperty("rowHeader", new PropertyValueGenerator<Integer>() {
+            private long index = 0;
+
+            @Override
+            public Integer getValue(Item item, Object itemId, Object propertyId) {
+                return container.indexOfId(itemId) + 1;
+            }
+
+            @Override
+            public Class<Integer> getType() {
+                return Integer.class;
+            }
+        });
+
+        //кнопка удаления
+        wrappingContainer.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                return FontAwesome.TRASH.getHtml();
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        grid.setContainerDataSource(wrappingContainer);
+        //grid.setEditorFieldGroup(new BeanFieldGroup<>(HospitalBean.class));
+        grid.setColumns("rowHeader","name","address","delete");
+        grid.getColumn("name").setExpandRatio(1);
+        grid.getColumn("address").setExpandRatio(1);
+        grid.setHeightMode(HeightMode.UNDEFINED);
+
+        Grid.HeaderRow header = grid.getDefaultHeaderRow();
+        header.getCell("name").setHtml("Наименование");
+        header.getCell("address").setHtml("Адрес");
+
+        grid.getColumn("rowHeader").setHeaderCaption("").setHidable(false).setEditable(false).setResizable(false);//.setWidth(30);
+        grid.setFrozenColumnCount(1);
+        grid.addColumnResizeListener(event -> {
+            grid.getColumn("address").setWidthUndefined();//.setExpandRatio(1);
+        });
+
+        grid.setEditorSaveCaption("Сохранить");
+        grid.setEditorCancelCaption("Отмена");
+        grid.getEditorFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
+            @Override
+            public void preCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {}
+            @Override
+            public void postCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {
+                try{
+                    Item gpi = ((GeneratedPropertyContainer.GeneratedPropertyItem) commitEvent.getFieldBinder().getItemDataSource()).getWrappedItem();
+                    Object item = ((BeanItem) gpi).getBean();
+                    objectsConverterService.convertToSpingBean(((HospitalBean) item)).save();
+                }catch (Exception e){
+                    Notification.show("Ошика записи",e.getMessage(),
+                            Notification.Type.ERROR_MESSAGE);
+                }
+            }
+        });
+        grid.getColumn("delete")
+                .setRenderer(new ButtonRenderer())
+                .setHeaderCaption("")
+                .setHidable(false)
+                .setEditable(false)
+                .setResizable(false);
+
+        //filters
+        PulseUI.getPulseHelper().setRowFilters(grid,container);
+
+
+    }
+
+    @Subscribe
+    public void updateHospitalsList(final PulseEvent.CreateEditHospital event){
+        BeanContainer container = (BeanContainer) grid.getContainerDataSource();
+        container.addAll(HospitalBean.getAllHospitals());
+        grid.setContainerDataSource(container);
+    }
+
+
+    private class ButtonDelete extends ButtonRenderer{
+        ButtonDelete(){
+            super();
+            setStyleName("test");
+
+        }
+        public ButtonDelete(RendererClickListener listener) {
+            this();
+            //setStyleName(ValoTheme.BUTTON_DANGER);
+
+            addClickListener(listener);
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+        // A new instance of TransactionsView is created every time it's
+        // navigated to so we'll need to clean up references to it on detach.
+        PulseEventBus.unregister(this);
+    }
+}

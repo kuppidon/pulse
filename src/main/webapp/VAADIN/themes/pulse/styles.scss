@@ -1,0 +1,8 @@
+@import "addons";
+@import "pulse";
+
+.pulse {
+  // Output the actual theme selectors
+  @include addons;
+  @include pulse;
+}
