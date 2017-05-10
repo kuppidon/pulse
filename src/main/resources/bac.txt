@@ -1,0 +1,82 @@
+ private void buildGrid() {
+
+        grid = new Table();
+        grid.setMultiSelect(false);
+        grid.setSizeFull();
+        grid.setSortEnabled(true);
+        grid.setImmediate(true);
+        grid.setNullSelectionAllowed(false);
+        grid.addStyleName(ValoTheme.TABLE_SMALL);
+        grid.addStyleName(ValoTheme.TABLE_COMPACT);
+
+        grid.setColumnReorderingAllowed(true);
+        grid.setColumnCollapsingAllowed(true);
+
+        BeanItemContainer<CourseBean> dataContainer = DoctorsBookUI.getDataProvider().getOpenCourseByDepartment();
+        grid.setContainerDataSource(dataContainer);
+
+        grid.setColumnHeader("historyNumber", "№ истории");
+        grid.setColumnHeader("startDate", "Дата поступления");
+        grid.setColumnHeader("patient", "Пациент");
+        grid.setColumnHeader("responsible","Лечащий врач");
+        grid.setColumnHeader("diagnosisMKB10","Диагноз");
+        grid.setColumnAlignment("historyNumber", Align.CENTER);
+        grid.addGeneratedColumn("residences", new ColumnGenerator() {
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+
+                CourseBean courseBean = (CourseBean) itemId;
+                List<ResidenceBean> list = courseBean.getResidences();
+                if (list.size() != 0){
+                    MenuBar menuBar = new MenuBar();
+                    menuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+                    menuBar.addStyleName(ValoTheme.LABEL_LIGHT);
+
+                    ResidenceBean currentRes = list.get(list.size() - 1);
+
+                    if (currentRes != null) {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");
+                        MenuBar.MenuItem currentValue = menuBar.addItem(currentRes.getStructuralUnit() + " c " + dateFormat.format(currentRes.getStartDate()), null);
+                        Iterator<ResidenceBean> iterator = list.iterator();
+                        while (iterator.hasNext()) {
+                            ResidenceBean prevRes = iterator.next();
+                            if (prevRes.equals(currentRes)){
+                                continue;
+                            }
+                            currentValue.addItem(prevRes.getStructuralUnit() + " c " + dateFormat.format(prevRes.getStartDate()), FontAwesome.BED,null)
+                                    .setEnabled(false);
+                        }
+                        return menuBar;
+                    }
+                }
+
+                return "не указано";
+            }
+        });
+        grid.setVisibleColumns(new Object[] {"historyNumber", "startDate", "patient", "responsible", "diagnosisMKB10", "residences"});
+        grid.setColumnHeader("residences", "Размещение");
+
+        grid.setSortContainerPropertyId("patient");
+        grid.setPageLength(grid.size());
+        grid.setFooterVisible(true);
+
+
+        grid.addValueChangeListener(event -> {
+            CourseBean selectCourse = (CourseBean) event.getProperty().getValue();
+            patient = (selectCourse == null)?null:selectCourse.getPatient();
+            course  = selectCourse;
+            selectFromTable = true;
+            patientField.setConvertedValue(patient);
+           // setVisibleControlsButtom();
+        });
+
+        grid.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+            @Override
+            public void itemClick(ItemClickEvent event) {
+                if (event.isDoubleClick()) {
+                    getUI().addWindow(((CourseBean) event.getItemId()).editCourse());
+                }
+            }
+        });
+
+    }
